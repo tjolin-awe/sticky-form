@@ -8,35 +8,35 @@
 
  */
 
-
-
-/**
-
- * @description Caches and restores form values for embedded mobile applications
- * @version 0.0.1
- * @author Thomas Jolin
-
- */﻿
 if (typeof jQuery === 'undefined') {
-    throw new Error('sticky-form requires the jQuery library.');
+    throw new Error('"StickyForm" requires the jQuery library.');
 }
 
 
 
 (function ($) {
     'use strict';
-    $.fn.ApplicationCache = function (options) {
+    $.fn.StickyForm = function (options) {
 
         if (!this.is('form')) {
-            throw new Error('ApplicationCache only works when applied to a form element.');
+            throw new Error('"StickyForm" only works when applied to a form element.');
         }
 
         if (localStorage == null) {
-            console.log("ApplicationCache only works when local storage is available.");
-            return null;
+            console.log('"StickyForm" only works when local storage is available.');
+            return;
         }
 
-        var $form = this;
+        var $form = $(this);
+
+        var page = localStorage.getItem("page");
+
+
+        if (page !== null) {
+            if (page !== window.location.href) {
+                window.location = page;
+            }
+        }
 
         var defaults = {
             autorestore: true,
@@ -51,7 +51,16 @@ if (typeof jQuery === 'undefined') {
 
         var settings = $.extend(true, defaults, options);
 
-        var GetField = function (element) {
+
+        function translateField(element) {
+
+            console.log($(element).data("cache"));
+            return $form.attr('id') + '-' + $(element).data("cache");
+
+        }
+
+
+        function getFieldValue(element) {
 
             if (!$(element))
                 return;
@@ -76,7 +85,7 @@ if (typeof jQuery === 'undefined') {
             }
 
             if ($(element).is('span')) {
-                
+
                 return $(element).text();
             }
 
@@ -86,9 +95,8 @@ if (typeof jQuery === 'undefined') {
 
         }
 
-        var SetField = function (element, value) {
+        function setFieldValue(element, value) {
 
-           
             if ($(element).is('input')) {
 
                 if ($(element).attr('type') == "checkbox") {
@@ -111,35 +119,33 @@ if (typeof jQuery === 'undefined') {
             if ($(element).is('span')) {
                 $(element).text(value);
                 return true;
-            } 
+            }
 
             return false;
         }
 
-        var LoadField = function (element) {
-        
-            var field = $form.id + '-' + $(element).data("cache");
+        var RestoreField = function (element) {
+
+            var field = translateField(element);
             var value = localStorage.getItem(field);
 
             if (value != null) {
-                SetField($(element), value);
+                setFieldValue($(element), value);
                 settings.onFieldRestored(field, value);
             }
         }
 
         var SetPage = function (page) {
 
-            if (localStorage != null) {
-
-                localStorage.setItem("page", page);
-                window.location = page;
-            }
+            localStorage.setItem("page", page);
         }
 
-        var SaveField = function (element) {
+        var CacheField = function (element) {
 
-            var field = $form.id + '-' + $(element).data("cache");
-            var value = GetField($(element));
+            SetPage(window.location);
+
+            var field = translateField(element);
+            var value = getFieldValue(element);
 
             if (value != null) {
                 localStorage.setItem(field, value);
@@ -147,39 +153,40 @@ if (typeof jQuery === 'undefined') {
             }
         }
 
-        var CallBack = function(element) {
+        var CallBack = function (element) {
 
-            var id = '#' + $(element).attr('id');       
+            var id = '#' + $(element).attr('id');
             var description = $(element).data('description');
 
-            SaveField($(id));
-            SaveField($(description));
+            CacheField($(id));
+            CacheField($(description));
 
 
             settings.onSuccess.call(element);
 
         }
 
-        var SubmitChange = function (element) {
+        function submitChange(element) {
 
             var parameter = $(element).data('parameter');
-            var id = '#' + $(element).attr('id');       
+            var id = '#' + $(element).attr('id');
 
-            
+
             if (parameter) {
                 settings.onSubmit($(element), CallBack);
             }
             else {
-                SaveField($(id));       // Save free field
+                CacheField($(id));       // Save free field
             }
         }
 
         var ClearField = function (element) {
-            var field = $(element).data("cache");
-            localStorage.removeItem(field);
+
+            localStorage.removeItem(translateField(element));
         }
 
-        $(document).on('click', '.cached-field-clear', function (event) {
+        var ClearFormCache = function () {
+
 
 
             var elements = $form.find("*").filter(function () {
@@ -190,17 +197,25 @@ if (typeof jQuery === 'undefined') {
                 ClearField($(this));
             });
 
+
+            console.log('clearing form tag');
+            localStorage.removeItem('page');
+
             settings.onCacheCleared();
+        }
+
+
+        $(document).on('click', '.cached-field-clear', function (event) {
+
+            ClearFormCache();
         });
 
         $form.on('change', '.cached-field', function (event) {
-            SubmitChange($(this));
+            submitChange($(this));
         });
 
         $form.on('blur', '.cached-field', function (event) {
-            SubmitChange($(this));
-
-            localStorage.SaveField($form.id);
+            submitChange($(this));
         });
 
         if (settings.autorestore == true) {
@@ -210,12 +225,54 @@ if (typeof jQuery === 'undefined') {
             });
 
             $(elements).each(function () {
-                LoadField($(this));
+                RestoreField($(this));
             });
 
             settings.onCacheRestored();
         }
 
+
+        // clear cache on unload
+        window.onbeforeunload = function (e) {
+            ClearFormCache();
+
+        }
+
+
+        $form.on('submit', function () {
+            ClearFormCache();
+        });
+
+
+        var a = document.getElementsByTagName("a");
+        for (var i = 0, len = a.length; i < len; i++) {
+            if (a[i].getAttribute("href")) {
+                a[i].onclick = function () {
+
+                    ClearFormCache();
+                    window.location = this.getAttribute("href");
+                    return false;
+                }
+            }
+        }
+
+        var addToPostBack = function (func) {
+            var previous__doPostBack = __doPostBack;
+            if (typeof __doPostBack != 'function') {
+                __doPostBack = func;
+            } else {
+                __doPostBack = function (t, a) {
+                    if (func(t, a)) previous__doPostBack(t, a);
+                }
+            }
+        };
+
+        addToPostBack(function (t, a) {
+            ClearFormCache();
+        });
+
+
+        page = null;
         return this;
     };
 }(jQuery));
