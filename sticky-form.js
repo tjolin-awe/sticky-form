@@ -1,4 +1,22 @@
-﻿
+/*!
+
+ * sticky-form v0.0.1 (https://github.com/tjolin-awe/sticky-form)
+
+ * Copyright (c) 2018 Thomas Jolin
+
+ * Licensed under MIT (https://github.com/tjolin-awe/sticky-form/master/LICENSE)
+
+ */
+
+
+
+/**
+
+ * @description Caches and restores form values for embedded mobile applications
+ * @version 0.0.1
+ * @author Thomas Jolin
+
+ */﻿
 if (typeof jQuery === 'undefined') {
     throw new Error('sticky-form requires the jQuery library.');
 }
