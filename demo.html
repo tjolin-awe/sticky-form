@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head runat="server">
+        <meta charset="utf-8">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, minimal-ui, user-scalable=no" ">
+        <title>Demo</title>
+
+</head>
+    <body>
+
+        <form id="myForm">
+
+            <label for="txtFirstName">First Name</label>
+            <input id="txtFirstName" type="text" class="cached-field" data-cache="firstname" />
+
+            <label for="txtLastName">Last Name</label>
+            <input id="txtLastName" type="text" class="cached-field" data-cache="lastname" />
+
+            <label for="txtNickName">Nick Name</label>
+            <input id="txtNickName" type="text" class="cached-field" data-cache="nickname" />
+
+            <button id="btnSubmit" type="submit">Submit</button>
+            <button id="btnCancel" type="reset" class="cached-field-clear">Clear Cache</button>
+
+        </form>
+
+
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <script src="Scripts/sticky-form.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+
+                if ($('#myForm').length) {
+                $('#myForm').StickyForm({
+                    autorestore: true,
+                    onCacheCleared: function () {
+                        console.log('Application Cache cleared!');
+                    },
+                    onCacheRestored: function () {
+                        console.log('Application Cache restored!');
+                    },
+                    onFieldCached: function (field, value) {
+                        console.log(field + ':' + value);       // called after a field is cached
+                    },
+                    onFieldRestored: function (field, value) {
+                        console.log(field + ':' + value);       // called after a field is restored
+                    },
+                    onSubmit: function (element, callback) {
+                        console.log("Custom action to perform on blur or change");  // called when input loses focus or changes
+                    },
+                    onSuccess: function (element, parameter, response) {
+                        console.log("Ajax call successful!");                      //  callback after successful ajax call
+                    },
+                    onFail: function (xhr, ajaxOptions, thrownError) {
+                        console.log("Ajax call failed");
+                    }
+                });
+            }
+            });
+        </script>
+    </body>
+</html>

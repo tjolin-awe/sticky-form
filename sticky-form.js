@@ -1,15 +1,6 @@
-/*!
-
- * sticky-form v0.0.1 (https://github.com/tjolin-awe/sticky-form)
-
- * Copyright (c) 2018 Thomas Jolin
-
- * Licensed under MIT (https://github.com/tjolin-awe/sticky-form/master/LICENSE)
-
- */
-
+﻿
 if (typeof jQuery === 'undefined') {
-    throw new Error('"StickyForm" requires the jQuery library.');
+    throw new Error('sticky-form requires the jQuery library.');
 }
 
 
@@ -19,11 +10,11 @@ if (typeof jQuery === 'undefined') {
     $.fn.StickyForm = function (options) {
 
         if (!this.is('form')) {
-            throw new Error('"StickyForm" only works when applied to a form element.');
+            throw new Error('StickyForm only works when applied to a form element.');
         }
 
         if (localStorage == null) {
-            console.log('"StickyForm" only works when local storage is available.');
+            console.log("StickyForm only works when local storage is available.");
             return;
         }
 
@@ -54,7 +45,6 @@ if (typeof jQuery === 'undefined') {
 
         function translateField(element) {
 
-            console.log($(element).data("cache"));
             return $form.attr('id') + '-' + $(element).data("cache");
 
         }
@@ -256,22 +246,29 @@ if (typeof jQuery === 'undefined') {
             }
         }
 
-        var addToPostBack = function (func) {
-            var previous__doPostBack = __doPostBack;
-            if (typeof __doPostBack != 'function') {
-                __doPostBack = func;
-            } else {
-                __doPostBack = function (t, a) {
-                    if (func(t, a)) previous__doPostBack(t, a);
+
+        if (typeof __doPostBack !== 'undefined') {
+
+            var addToPostBack = function (func) {
+
+
+                var previous__doPostBack = __doPostBack;
+                if (typeof __doPostBack != 'function') {
+                    __doPostBack = func;
+                } else {
+                    __doPostBack = function (t, a) {
+                        if (func(t, a)) previous__doPostBack(t, a);
+                    }
                 }
-            }
-        };
+            };
 
-        addToPostBack(function (t, a) {
-            ClearFormCache();
-        });
+            addToPostBack(function (t, a) {
+                ClearFormCache();
+            });
 
+        }
 
+       
         page = null;
         return this;
     };
