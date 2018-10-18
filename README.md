@@ -16,9 +16,7 @@ sticky-form requires jQuery.
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Include the sticky-form 
+Include the sticky-form plugin on you page 
 
 ```
 <script src="scripts/sticky-form.js"></script>
@@ -38,8 +36,9 @@ To initialize the plug
   }
 ```
 
+see the [demo.html](demo.html) file for details
 
-End with an example of getting some data out of the system or using it for a little demo
+
 
 
 ## License
